@@ -5,7 +5,7 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction) => 
   const authHeader = req.headers.authorization;
 
   if (!authHeader?.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "Access token missing" });
+    return res.status(400).json({ message: "Access token missing" });
   }
 
   const token = authHeader.split(" ")[1];
