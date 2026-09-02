@@ -1,0 +1,17 @@
+CREATE INDEX "board_workspace_id_idx" ON "board" USING btree ("workspace_id");--> statement-breakpoint
+CREATE INDEX "board_created_by_idx" ON "board" USING btree ("created_by");--> statement-breakpoint
+CREATE INDEX "invites_invite_from_idx" ON "invites" USING btree ("invite_from");--> statement-breakpoint
+CREATE INDEX "invites_invite_for_workspace_idx" ON "invites" USING btree ("invite_for_workspace");--> statement-breakpoint
+CREATE INDEX "invites_invite_to_idx" ON "invites" USING btree ("invite_to");--> statement-breakpoint
+CREATE INDEX "invites_invite_to_accepted_idx" ON "invites" USING btree ("invite_to","invite_accepted");--> statement-breakpoint
+CREATE INDEX "tasks_reporter_id_idx" ON "tasks" USING btree ("reporter_id");--> statement-breakpoint
+CREATE INDEX "tasks_assignee_id_idx" ON "tasks" USING btree ("assignee_id");--> statement-breakpoint
+CREATE INDEX "tasks_board_id_idx" ON "tasks" USING btree ("board_id");--> statement-breakpoint
+CREATE INDEX "tasks_workspace_id_idx" ON "tasks" USING btree ("workspace_id");--> statement-breakpoint
+CREATE INDEX "tasks_status_idx" ON "tasks" USING btree ("status");--> statement-breakpoint
+CREATE INDEX "tasks_board_id_status_idx" ON "tasks" USING btree ("board_id","status");--> statement-breakpoint
+CREATE INDEX "users_email_idx" ON "users" USING btree ("email");--> statement-breakpoint
+CREATE INDEX "workspace_created_by_idx" ON "workspace" USING btree ("created_by");--> statement-breakpoint
+CREATE INDEX "workspace_members_workspace_id_idx" ON "workspace_members" USING btree ("workspace_id");--> statement-breakpoint
+CREATE INDEX "workspace_members_user_id_idx" ON "workspace_members" USING btree ("user_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "workspace_members_unique_idx" ON "workspace_members" USING btree ("workspace_id","user_id");
