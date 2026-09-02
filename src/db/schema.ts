@@ -33,8 +33,6 @@ export const users = pgTable(
     password: text("password").notNull(),
   },
   (table) => [
-    // speeds up login lookups (unique() above already creates an index,
-    // but explicit for clarity if you drop the unique constraint later)
     index("users_email_idx").on(table.email),
   ]
 );
@@ -72,7 +70,6 @@ export const workspaceMembers = pgTable(
   (table) => [
     index("workspace_members_workspace_id_idx").on(table.workspaceId),
     index("workspace_members_user_id_idx").on(table.userId),
-    // prevent duplicate memberships + speeds up "is user X in workspace Y" checks
     uniqueIndex("workspace_members_unique_idx").on(
       table.workspaceId,
       table.userId
@@ -130,8 +127,6 @@ export const tasks = pgTable(
     index("tasks_board_id_idx").on(table.boardId),
     index("tasks_workspace_id_idx").on(table.workspaceId),
     index("tasks_status_idx").on(table.status),
-    // common query pattern: "all tasks on this board with this status"
-    // (e.g. kanban column view)
     index("tasks_board_id_status_idx").on(table.boardId, table.status),
   ]
 );
@@ -157,7 +152,6 @@ export const invites = pgTable(
   (table) => [
     index("invites_invite_from_idx").on(table.inviteFrom),
     index("invites_invite_for_workspace_idx").on(table.inviteForWorkspace),
-    // most common lookup: "pending invites for this user"
     index("invites_invite_to_idx").on(table.inviteTo),
     index("invites_invite_to_accepted_idx").on(
       table.inviteTo,
@@ -165,6 +159,32 @@ export const invites = pgTable(
     ),
   ]
 );
+
+export const refreshTokens = pgTable(
+  "refresh_tokens",
+  {
+    _id: serial("_id").primaryKey(),
+    id: uuid("id").defaultRandom().notNull().unique(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    tokenHash: text("token_hash").notNull(), 
+    expiresAt: timestamp("expires_at").notNull(),
+    revoked: boolean("revoked").default(false).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("refresh_tokens_user_id_idx").on(table.userId),
+    index("refresh_tokens_token_hash_idx").on(table.tokenHash),
+  ]
+);
+
+export const refreshTokensRelations = relations(refreshTokens, ({ one }) => ({
+  user: one(users, {
+    fields: [refreshTokens.userId],
+    references: [users.id],
+  }),
+}));
 
 /* ---------------------------- RELATIONS ---------------------------- */
 
