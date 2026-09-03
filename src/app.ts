@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import authRouter from "./routes/auhRoutes/auth.routes";
 import { globalLimiter } from "./middlewares/ratelimiter";
+import workspaceRouter from "./routes/workspaceRoutes/workspace.routes";
 
 const app = express();
 
@@ -26,6 +27,8 @@ app.get("/api/health",(req,res) => {
 
 // ----------------------------------auth routes--------------------------------
 app.use("/api/v1/auth",authRouter);
+// -------------------------------------workspace routes------------------------------
+app.use("/api/v1/workspace",workspaceRouter);
 
 
 

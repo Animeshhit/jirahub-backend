@@ -44,14 +44,13 @@ export const workspace = pgTable(
   {
     _id: serial("_id").primaryKey(),
     id: uuid("id").defaultRandom().notNull().unique(),
+    name: varchar("name", { length: 256 }).notNull(), // added
     createdBy: uuid("created_by")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     createdOn: timestamp("created_on").defaultNow().notNull(),
   },
-  (table) => [
-    index("workspace_created_by_idx").on(table.createdBy),
-  ]
+  (table) => [index("workspace_created_by_idx").on(table.createdBy)]
 );
 
 // join table for workspace.peoples : list[users]  (many-to-many)
