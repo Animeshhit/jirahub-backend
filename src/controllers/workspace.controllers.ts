@@ -3,6 +3,62 @@ import { eq, and, ne } from "drizzle-orm";
 import { db } from "../db/db.ts";
 import { workspace, workspaceMembers, invites, users } from "../db/schema.ts";
 
+
+
+
+
+
+
+
+
+export const getWorkspaceById = async (req: Request, res: Response) => {
+  try {
+    const { workspaceId } = req.params;
+    const userId = (req as any).user?.userId;
+
+    if (!workspaceId || typeof workspaceId !== "string") {
+      return res.status(400).json({ message: "workspaceId is required" });
+    }
+
+    const ws = await db.query.workspace.findFirst({
+      where: eq(workspace.id, workspaceId),
+    });
+
+    if (!ws) {
+      return res.status(404).json({ message: "Workspace not found" });
+    }
+
+    const membership = await db.query.workspaceMembers.findFirst({
+      where: and(
+        eq(workspaceMembers.workspaceId, workspaceId),
+        eq(workspaceMembers.userId, userId)
+      ),
+    });
+
+    if (!membership) {
+      return res.status(403).json({ message: "You are not a member of this workspace" });
+    }
+
+    const memberRows = await db.query.workspaceMembers.findMany({
+      where: eq(workspaceMembers.workspaceId, workspaceId),
+      with: { user: { columns: { id: true, name: true, email: true } } },
+    });
+
+    const members = memberRows.map((row) => ({
+      id: row.user.id,
+      name: row.user.name,
+      email: row.user.email,
+      isAdmin: row.user.id === ws.createdBy,
+      joinedOn: row.joinedOn,
+    }));
+
+    return res.status(200).json({ workspace: ws, members });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 /* ------------------------- CREATE WORKSPACE ------------------------- */
 
 export const createWorkspace = async (req: Request, res: Response) => {
@@ -266,3 +322,4 @@ export const deleteWorkspace = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
